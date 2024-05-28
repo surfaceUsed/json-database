@@ -28,6 +28,7 @@ enum RequestType {
     }
 
     public static String getRequest(RequestType type) {
-        return (type.getRequestType() != null) ? type.getRequestType() : INVALID_REQUEST.getRequestType();
+        return (type.getRequestType() != null) ? 
+            type.getRequestType() : INVALID_REQUEST.getRequestType();
     }
 }

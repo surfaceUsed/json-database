@@ -7,7 +7,6 @@ import com.google.gson.JsonObject;
 import org.example.application.serverApp.server.util.Directory;
 import org.example.application.serverApp.server.util.Response;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -25,37 +24,36 @@ public class FileSystem implements Datasource {
 
     private final Directory serverDirectory;
 
-    private String databaseFilePath;
     private JsonObject database;
+    private String databaseFilePath;
     private Lock readLock;
     private Lock writeLock;
 
     public FileSystem(Directory directory) {
         this.serverDirectory = directory;
+        this.database = new JsonObject();
         loadFileSystem();
+    }
+
+    private void loadFileSystem() {
+        loadSaveFile();
         loadDatabase();
         loadLocks();
     }
 
-    private void loadFileSystem() {
+    private void loadSaveFile() {
         this.serverDirectory.createFile(DB_FILE);
-        this.databaseFilePath = this.serverDirectory.getPath() + File.separator + DB_FILE;
+        this.databaseFilePath = this.serverDirectory.getFullPath();
     }
 
     private void loadDatabase() {
-
         try {
 
             String fileContent = this.serverDirectory.readFile(this.databaseFilePath);
             this.database = new Gson().fromJson(fileContent, JsonObject.class);
 
-            if (this.database == null) {
-                this.database = new JsonObject();
-            }
-
         } catch (IOException e) {
-            System.out.println("Error reading file in loadDatabase(): " + e.getMessage());
-            throw new RuntimeException("Error loading database loadDatabase(): " + e.getMessage());
+            throw new RuntimeException("Error reading database from file \"" + DB_FILE + "\": " + e.getMessage());
         }
     }
 
@@ -67,7 +65,6 @@ public class FileSystem implements Datasource {
 
     @Override
     public Response set(JsonElement key, JsonElement value) {
-
         try {
 
             this.writeLock.lock();
@@ -84,16 +81,12 @@ public class FileSystem implements Datasource {
                     JsonArray array = key.getAsJsonArray();
                     String lastKey = array.remove(array.size() - 1).getAsString();
                     handleJsonElement(array, SET).getAsJsonObject().add(lastKey, value);
-
                 }
-
                 return Response.newBuilder().response(RESPONSE_SUCCESS).build();
             }
-
             return Response.newBuilder().response(RESPONSE_ERROR).reason(INVALID_KEY).build();
 
         } finally {
-
             this.writeLock.unlock();
         }
     }
@@ -101,7 +94,6 @@ public class FileSystem implements Datasource {
     @Override
     public Response get(JsonElement key) {
         boolean valueFound = false;
-
         try {
 
             this.readLock.lock();
@@ -131,7 +123,6 @@ public class FileSystem implements Datasource {
                     }
                 }
             }
-
             return (valueFound) ? Response.newBuilder().response(RESPONSE_SUCCESS).value(value).build() :
                     Response.newBuilder().response(RESPONSE_ERROR).reason(INVALID_KEY).build();
 
@@ -143,7 +134,6 @@ public class FileSystem implements Datasource {
     @Override
     public Response delete(JsonElement key) {
         boolean valueFound = false;
-
         try {
 
             this.writeLock.lock();
@@ -172,7 +162,6 @@ public class FileSystem implements Datasource {
                     }
                 }
             }
-
             return (valueFound) ? Response.newBuilder().response(RESPONSE_SUCCESS).build() :
                     Response.newBuilder().response(RESPONSE_ERROR).reason(INVALID_KEY).build();
 
@@ -183,7 +172,6 @@ public class FileSystem implements Datasource {
 
     @Override
     public Response exit() {
-
         try {
 
             this.readLock.lock();
@@ -197,7 +185,6 @@ public class FileSystem implements Datasource {
             } catch (IOException e) {
                 System.out.println("Error writing to file: " + e.getMessage());
             }
-
             return Response.newBuilder()
                     .response(RESPONSE_ERROR)
                     .build();

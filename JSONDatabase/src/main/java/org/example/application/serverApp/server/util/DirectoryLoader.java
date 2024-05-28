@@ -9,6 +9,7 @@ import java.nio.file.Paths;
 class DirectoryLoader extends Directory {
 
     private final String directoryPath;
+    private String fullPath;
 
     DirectoryLoader(String directoryPath) {
         this.directoryPath = directoryPath;
@@ -22,13 +23,15 @@ class DirectoryLoader extends Directory {
     @Override
     public void createFile(String fileName) {
 
-        Path filePath = Paths.get(this.directoryPath + File.separator + fileName);
+        this.fullPath = this.directoryPath + File.separator + fileName;
+
+        Path filePath = Paths.get(this.fullPath);
         if (!Files.exists(filePath)) {
 
             try {
                 Files.createFile(filePath);
             } catch (IOException e) {
-                throw new RuntimeException("Error creating file \"" + fileName + "\"");
+                throw new RuntimeException("Error creating file \"" + fileName + "\": " + e.getMessage());
             }
 
         } else {
@@ -37,8 +40,8 @@ class DirectoryLoader extends Directory {
     }
 
     @Override
-    public String getPath() {
-        return this.directoryPath;
+    public String getFullPath() {
+        return this.fullPath;
     }
 
     @Override

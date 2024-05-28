@@ -18,11 +18,9 @@ public abstract class Directory {
 
         if (loader.isDirectoryValid()) {
 
-            System.out.println("Directory valid!");
             return loader;
         }
-
-        System.out.println("Directory invalid");
-        throw new RuntimeException();
+        
+        throw new RuntimeException("Directory invalid!");
     }
 }

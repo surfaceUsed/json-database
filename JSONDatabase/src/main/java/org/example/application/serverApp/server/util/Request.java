@@ -26,8 +26,4 @@ public final class Request {
     public static Request fromJson(String json) {
         return new Gson().fromJson(json, Request.class);
     }
-
-    public String toJson(Request request) {
-        return new Gson().toJson(request);
-    }
 }

@@ -8,7 +8,7 @@ public abstract class Directory {
 
     public abstract String readFile(String path) throws IOException;
 
-    public abstract String getPath();
+    public abstract String getFullPath();
 
     public abstract void writeToFile(String path, String data) throws IOException;
 
@@ -20,7 +20,7 @@ public abstract class Directory {
 
             return loader;
         }
-        
-        throw new RuntimeException("Directory invalid!");
+
+        throw new RuntimeException("Directory invalid");
     }
 }
